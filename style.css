@@ -1,6 +1,6 @@
 html {
     min-height: auto;
-    overflow: hidden;
+    overflow: scroll;
 }
 body{
     height: calc(100vh-8em);
