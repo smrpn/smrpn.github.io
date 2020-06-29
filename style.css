@@ -30,14 +30,42 @@ body{
 */
 
 
-h1{
+.typing{
     animation: type 2s steps(21);
     overflow: hidden;
     white-space: nowrap;
-    border-right: 3px solid white;
+    border-right: 2px solid white;
     width:21ch;
 
 }
+/*
+.container{
+    width: 400px;
+    position: absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+}
+
+.terminal {
+    width: 100%;
+    padding: 14px;
+    background-color: black;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px 1px #000;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 22px;
+    color: rgb(32, 184, 65);
+    display: inline-block;
+    margin:6px 0px;
+
+
+}
+
+*/
+
+
+
 
 @keyframes type{
     0%{
