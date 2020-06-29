@@ -4,19 +4,53 @@
 <link rel="stylesheet" href="style.css">
 
 <body style="background-color:rgb(0, 0, 0)">
-    <div>
-        <h1 class="typing" style="color:rgb(224, 233, 225); font-size: 50px;">Hello! I am Samarpan.</h1>
+    <div class="container">
+        <h1 class="typing" style="color:rgb(224, 233, 225); font-size: 50px;">
+            Hello! I am
+            <span class="naam">Samarpan.</span>
+            <!--<span class="cursor" style="font-size: 30px;">0</span>-->
+        </h1>
     </div>
+
+    <!--
+        <div class="container">
+        <div class="terminal">
+            <span class="demo-01">deep learning</span>
+
+        </div>
+        
+    </div>
+    -->
 
     <p style="color:rgb(27, 177, 35);">An undergraduate at Indian Institute of Technology, Roorkee, India, batch of
         2023.
     </p>
 
-    <p style="color:rgb(27, 177, 35);">I am a programmer and a polymer engineering enthusiast. My interests are well
-        diversified in
-        statistics, deep
-        learning, finance and energy engineering.
+    <p style="color:rgb(27, 177, 35);">I am a programmer and a polymer engineering enthusiast.
+        <span>My interests are well
+            diversified in</span>
+        <span class="demo-01">
+        </span>
     </p>
+
+    <script src=" https://cdn.jsdelivr.net/npm/typed.js@2.0.11"></script>
+    <script>
+        var typed1 = new Typed('.demo-01', {
+            strings: [
+                '',
+                'programmming',
+                'mathmematics.',
+                'statistics.',
+                'movies.',
+                'literature.',
+                'fine-arts.',
+            ],
+            typeSpeed: 20,
+            backSpeed: 0,
+            loop: true
+        });
+    </script>
+
     <p style="color:rgb(91, 211, 97);">Yeah, I'm that nerd who codes all day long and reads during meals.</p>
 
 
