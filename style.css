@@ -29,7 +29,26 @@ body{
 
 */
 
+.icon-bar {
+    width: 100%;
+    background-color: #0d3010;
+    overflow: auto;
+}
+.icon-bar a{
+    float: left;
+    width: 20%;
 
+    padding: 12px;
+    transition: all 0.3s ease;
+
+}
+
+.icon-bar a:hover {
+    background-color: #0d3010;
+}
+.active{
+    background-color: rgb(185, 75, 75);
+}
 .typing{
     animation: type 2s steps(21);
     overflow: hidden;
