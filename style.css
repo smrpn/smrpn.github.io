@@ -5,30 +5,34 @@ html {
 body{
     height: calc(100vh-8em);
     padding:4em;
-    font-family: 'Courier New', Courier, monospace;
+    background-color: black;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     box-sizing: border-box;
 }
 
 pre {
-    background-color: aliceblue;
-    padding: 5px;
+    background-color: rgb(22, 26, 22);
+    padding: 10px;
     border-radius: 5px;
 }
 
 code {
     font-size: 15px;
-    background-color: aliceblue;
-    border-color: azure;
-    color: #000000;
-    border-color: black;
+    color: #ffffff;
 }
 
 .icon-bar {
+    padding: 10px;
     text-decoration: none;
     width: 100%;
     background-color: #000000;
     overflow: auto;
 }
+
+.blog-link a:hover{
+    text-decoration: underline;
+}
+
 .icon-bar a{
     float: left;
     width: 10%;
@@ -40,7 +44,7 @@ code {
 .icon-bar a:hover {
     border-radius: 5px;
     width: 8%;
-    background-color: #0d3010;
+    background-color: #131413;
 }
 .active{
     background-color: rgb(0, 0, 0);
