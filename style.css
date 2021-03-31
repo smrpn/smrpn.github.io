@@ -9,9 +9,18 @@ body{
     box-sizing: border-box;
 }
 
-.code {
-    border-width: 1px;
-    border-color: antiquewhite;
+pre {
+    background-color: aliceblue;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+code {
+    font-size: 15px;
+    background-color: aliceblue;
+    border-color: azure;
+    color: #000000;
+    border-color: black;
 }
 
 .icon-bar {
