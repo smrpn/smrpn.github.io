@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+    <title>smrpn</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="./../style.css">
+</head>
+
+
+
+<body style="background-color:rgb(0, 0, 0)">
+
+    <div style="align-content: center;">
+        <h1 style="color:rgb(224, 233, 225);">
+            <a href="/blog.html" title="go back" style="text-decoration: none;color:rgb(224, 233, 225);">&lt;-</a>
+            Blogs
+        </h1>
+    </div>
+    <br>
+    <hr>
+    <div style="color:rgb(224, 233, 225)">
+        <h1 id="rust-ownership-and-borrowing">Rust: Ownership and Borrowing</h1>
+        <h3>What are they and how can we use them?</h3>
+        <p>smrpn.
+            31th March, 2021.</p>
+        <hr><br><br>
+
+        <p>I am learning Rust and made some notes about the Ownership and Borrowing concepts.
+            Please note that I am still coming to grips with these concepts while “fighting with the Rust borrow
+            checker” at the same time…</p>
+        <h2 id="ownership-in-rust">Ownership in Rust</h2>
+        <p>Ownership = binding/association of value to a variable. The rules are:</p>
+        <ul>
+            <li>Only one owner at a time.</li>
+            <li>If the binding is “released”, ownership is “gone” and data is “freed”.</li>
+        </ul>
+        <pre><code class="lang-rs">let p1 = Person::<span class="hljs-keyword">new</span>(); <span class="hljs-comment">//1</span>
+p2 = p1; <span class="hljs-comment">//2</span>
+let p1 = Person::<span class="hljs-keyword">new</span>();
+do_something(p1); <span class="hljs-comment">//out of scope</span>
+</code></pre>
+        <p>On line 2, p1 will be freed. It&#39;s out of scope since it has transferred ownership to p2. Passing p1 into
+            another function also has the same effect.</p>
+        <pre><code class="lang-rs"><span class="hljs-keyword">let</span> p1 = Person::new();
+p2 = p1;
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"person {#:?}"</span>, p2)
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"person {#:?}"</span>, p1) <span class="hljs-comment">//compile error</span>
+</code></pre>
+        <p>That’s the reason Rust does not allow you to use that value again. It enforces this at compile time using
+            borrow checker.</p>
+        <pre><code><span class="hljs-keyword">Drop</span>
+</code></pre>
+        <p>It is possible to implement the <code>drop</code> method from the <code>Drop</code> trait if custom cleanup
+            logic is required. It will be automatically called by Rust when that value goes out of scope.</p>
+        <p>Once a variable is out-of-scope, i.e. its ownership has been relinquished, the Rust compiler will not allow
+            you to use it again, since it needs to be “freed”. This is also called Moving, i.e. ownership of p1 moved to
+            p2.
+            Ownership is applicable to heap data only, not stack data since it (stack data) is “copied”, not “moved”.
+        </p>
+        <pre><code><span class="hljs-keyword">Copy</span><span class="bash"></span>
+</code></pre>
+        <p>The Copy trait allows a value to be copied. All the primitive types (e.g. i32, bool, etc.) implement Copy
+            implicitly.
+            Custom types (e.g. structs) can implement Copy if all its components also implement <code>Copy</code>. To
+            implement, you can either use <code>#[derive(Copy)]</code> or use an explicit implementation.</p>
+        <h2 id="ways-of-passing-ownership">Ways of Passing Ownership</h2>
+        <p>And keeping the compiler happy.</p>
+        <ul>
+            <li>Use the clone() method.</li>
+            <li>Return from function.</li>
+            <li>Passing a reference.</li>
+            <li>Passing a mutable reference.</li>
+        </ul>
+        <h3 id="use-clone-">Use clone()</h3>
+        <p>Think of it as a <code>deep copy</code>-like operation where it creates a separate copy of the data on the
+            heap and points the new owner to it, leaving the old value untouched (or unmoved).
+            Some types implement the <code>Clone</code> trait by default (e.g. String), but you can mark your custom
+            types as clone-able using <code>#[derive(Clone)]</code>.</p>
+        <pre><code class="lang-rs"><span class="hljs-keyword">let</span> p1 = <span class="hljs-type">Person</span>::<span class="hljs-function"><span class="hljs-keyword">new</span>();
+<span class="hljs-title">let</span> <span class="hljs-title">p2</span> = <span class="hljs-title">p1</span>.<span class="hljs-title">clone</span>();
+<span class="hljs-title">do_something</span>(p2);
+<span class="hljs-title">println</span>!("{:?}, p1); <span class="hljs-comment">//works ok</span></span>
+</code></pre>
+        <h3 id="return-from-function">Return from function</h3>
+        <pre><code><span class="hljs-keyword">let</span> p1 = Person::new();
+do_something(p1);
+...
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">do_something</span></span>(p: Person) -&gt; Person {
+<span class="hljs-comment">//logic</span>
+}
+...
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"p = {}"</span>,p1); <span class="hljs-comment">//continue using p1 since ownership has been passed back</span>
+</code></pre>
+        <p>But this is just weird! You’re forced to return something just because you want to keep the variable in
+            scope.</p>
+        <h3 id="passing-a-reference">Passing a reference</h3>
+        <pre><code class="lang-rs"><span class="hljs-keyword">let</span> p1 = <span class="hljs-type">Person</span>::<span class="hljs-function"><span class="hljs-keyword">new</span>();
+<span class="hljs-title">do_something</span>(&amp;p1);
+<span class="hljs-title">println</span>!("p = {}",p1); <span class="hljs-comment">//continue using p1 since ownership has been was never passed on</span>
+...
+<span class="hljs-title">fn</span> <span class="hljs-title">do_something</span>(p: &amp;<span class="hljs-type">Person</span>) {
+<span class="hljs-comment">//logic</span>
+}
+...</span>
+</code></pre>
+        <p>The value of <code>p1</code> did <em>not move</em> — this is called <code>Borrowing</code>.
+            <code>do_something</code> never got the ownership, since all we did was pass a reference to <code>p1</code>
+            — notice the <code>&amp;</code>.
+        </p>
+        <h3 id="mutable-references">Mutable references</h3>
+        <p>If you want <code>do_something</code> logic to update the name of the <code>Person</code> reference,
+            you&#39;ll need to pass a mutable reference.</p>
+        <pre><code class="lang-rs"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> p1 = Person::new();
+do_something(&amp;<span class="hljs-keyword">mut</span> p1);
+<span class="hljs-built_in">println!</span>(<span class="hljs-string">"mutated info {}"</span>,p2)
+...
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">do_something</span></span>(p: &amp;<span class="hljs-keyword">mut</span> Person, new_name: <span class="hljs-built_in">String</span>) {
+   p.name = <span class="hljs-built_in">String</span>::from(new_name);
+}
+...
+</code></pre>
+        <p>Changes:</p>
+        <ul>
+            <li>Variable <code>p1</code> was declared as <code>mut</code> (mutable).</li>
+            <li>Passed <code>&amp;mut</code> to <code>do_something</code> instead of just <code>&amp;</code> — signifies
+                mutable reference.</li>
+            <li><code>do_something</code> signature updated to <code>&amp;mut</code> — signifies mutable reference.</li>
+        </ul>
+
+    </div>
+    <hr>
+    <br>
+    <div class="icon-bar" style="font-size: 20px;">
+        <a class="active" href="https://github.com/smrpn" target="_blank" title="Github">
+            <p style="color: antiquewhite;">Github</p>
+        </a>
+        <a href="https://www.linkedin.com/in/samarpan-dutta-537013194/" target="_blank" title="Linkedin">
+            <p style="color: antiquewhite;">Linkedin</p>
+        </a>
+        <a href="https://www.instagram.com/_smrpn_/" target="_blank" title="Instagram">
+            <p style="color: antiquewhite;">Instagram</p>
+        </a>
+        <a href="https://www.facebook.com/samar.spams" target="_blank" title="Facebook">
+            <p style="color: antiquewhite;">Facebook</p>
+        </a>
+    </div>
+</body>
+
+</html>
