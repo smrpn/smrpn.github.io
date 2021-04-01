@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-193498318-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-193498318-1');
+    </script>
+    <title>smrpn/blog/1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="./../style.css">
+    <meta property="og:url" content="https://smrpn.github.io/blog/2.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="smrpn/blog/1" />
+    <meta property="og:description" content="My .vimrc" />
+    <meta property="og:image" content="https://smrpn.github.io/blog/res/blog2.1.jpg" />
+</head>
+
+
+
+<body>
+
+    <div style="align-content: center;">
+        <h1 style="color:rgb(224, 233, 225);">
+            <a href="/blog.html" title="go back"
+                style="text-decoration: none;color:rgb(224, 233, 225);font-size: 40px;">&lt;-</a>
+            Blogs
+        </h1>
+    </div>
+    <br>
+    <hr>
+    <div style="color:rgb(224, 233, 225);">
+        <h1 id="my-.vimrc">My .vimrc</h1>
+        <h3>This is what i use</h3>
+        <p>smrpn.
+            1st April, 2021.</p>
+        <hr><br><br>
+        <p>I have been using the ultimate gawd code editor, i.e, vim for almost a year now. And, as a result, my annual
+            productivity has increased by almost 11 seconds.</p>
+        <p><img src="./res/blog2.4.jpg" style="width: 300px; border-radius: 5px;" alt="alt text"></p>
+        <p>So this is the post where I share my vim config with the muggles.</p>
+        <pre style="overflow-x: scroll;"><code>syntax enable
+
+set statusline&amp;
+set noerrorbells
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set smartindent
+set nu
+set nowrap
+set smartcase
+set noswapfile
+set nobackup
+set undodir=~./vim/undodir
+set undofile
+set incsearch
+set cursorline
+
+set colorcolumn=80
+highlight ColorColumn ctermbg=0 guibg=lightgrey
+
+autocmd BufNewFile *.cpp 0r ~/.vim/templates/skeleton.cpp
+
+autocmd FileType cpp nnoremap     <span class="hljs-attribute">&lt;leader&gt;</span>rm    :!g++ -g --std=c++17 % -o %:r<span class="hljs-attribute">&lt;CR&gt;</span>
+"autocmd FileType cpp nnoremap     <span class="hljs-attribute">&lt;leader&gt;</span>rm    :set makeprg=g++<span class="hljs-attribute">&lt;CR&gt;</span>:make % -o %:r<span class="hljs-attribute">&lt;CR&gt;</span>
+autocmd FileType cpp nnoremap     <span class="hljs-attribute">&lt;leader&gt;</span>rr    :!./%:r<span class="hljs-attribute">&lt;CR&gt;</span>
+autocmd FileType cpp nnoremap     <span class="hljs-attribute">&lt;leader&gt;</span>rt    :!for f in %:r.*.test; do echo "TEST: $f"; ./%:r <span class="hljs-attribute">&lt; $f; done&lt;CR&gt;</span>
+let mapleader=" "
+
+
+call plug#begin('~/.vim/plugged')
+
+Plug 'vim-airline/vim-airline'
+Plug 'morhetz/gruvbox'
+Plug 'ajmwagar/vim-deus'
+Plug 'jremmen/vim-ripgrep'
+Plug 'tpope/vim-fugitive'
+Plug 'leafgarland/typescript-vim'
+Plug 'vim-utils/vim-man'
+Plug 'lyuts/vim-rtags'
+Plug 'kien/ctrlp.vim'
+Plug 'ycm-core/YouCompleteMe'
+Plug 'mbbill/undotree'
+Plug 'rust-lang/rust.vim'
+
+call plug#end()
+
+
+colorscheme gruvbox
+set background=dark
+
+if executable('rg')
+    let g:rg_derive_root='true'
+endif
+
+
+
+
+
+" ag is fast enough that CtrlP doesn't need to cache "
+let g:ctrlp_use_cache = 0
+let g:netrw_winsize = 25
+let g:netrw_banner = 0
+let g:netrw_browse_split = 2
+
+
+inoremap {<span class="hljs-attribute">&lt;CR&gt;</span> {<span class="hljs-attribute">&lt;CR&gt;</span>}<span class="hljs-attribute">&lt;Esc&gt;</span>ko
+inoremap [<span class="hljs-attribute">&lt;CR&gt;</span> [<span class="hljs-attribute">&lt;CR&gt;</span>]<span class="hljs-attribute">&lt;Esc&gt;</span>ko
+inoremap (<span class="hljs-attribute">&lt;CR&gt;</span> (<span class="hljs-attribute">&lt;CR&gt;</span>)<span class="hljs-attribute">&lt;Esc&gt;</span>ko
+nnoremap <span class="hljs-attribute">&lt;leader&gt;</span>ps :Rg<span class="hljs-attribute">&lt;SPACE&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;leader&gt;</span>ghw :h <span class="hljs-attribute">&lt;C-R&gt;</span>=expand("<span class="hljs-attribute">&lt;cword&gt;</span>")<span class="hljs-attribute">&lt;CR&gt;</span><span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;leader&gt;</span>prw :CocSearch <span class="hljs-attribute">&lt;C-R&gt;</span>=expand("<span class="hljs-attribute">&lt;cword&gt;</span>")<span class="hljs-attribute">&lt;CR&gt;</span><span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;leader&gt;</span>bs /<span class="hljs-attribute">&lt;C-R&gt;</span>=escape(expand("<span class="hljs-attribute">&lt;cWORD&gt;</span>"), "/")<span class="hljs-attribute">&lt;CR&gt;</span><span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;leader&gt;</span>u :UndotreeShow<span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;Leader&gt;</span><span class="hljs-attribute">&lt;CR&gt;</span> :so ~/.config/nvim/init.vim<span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;Leader&gt;</span>+ :vertical resize +5<span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;Leader&gt;</span>- :vertical resize -5<span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;Leader&gt;</span>rp :resize 100<span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;Leader&gt;</span>ee oif err != nil {<span class="hljs-attribute">&lt;CR&gt;</span>log.Fatalf("%+v\n", err)<span class="hljs-attribute">&lt;CR&gt;</span>}<span class="hljs-attribute">&lt;CR&gt;</span><span class="hljs-attribute">&lt;esc&gt;</span>kkI<span class="hljs-attribute">&lt;esc&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;Leader&gt;</span>cpu a%" PRIu64 "<span class="hljs-attribute">&lt;esc&gt;</span>
+vnoremap J :m '&gt;+1<span class="hljs-attribute">&lt;CR&gt;</span>gv=gv
+vnoremap K :m '<span class="hljs-attribute">&lt;-2&lt;CR&gt;</span>gv=gv
+map <span class="hljs-attribute">&lt;C-q&gt;</span> :bnext<span class="hljs-attribute">&lt;CR&gt;</span>
+
+
+nnoremap <span class="hljs-attribute">&lt;leader&gt;</span>pv :wincmd v<span class="hljs-attribute">&lt;bar&gt;</span> :Ex <span class="hljs-attribute">&lt;bar&gt;</span> :vertical resize 30<span class="hljs-attribute">&lt;CR&gt;</span>
+
+"nmap <span class="hljs-attribute">&lt;silent&gt;</span> <span class="hljs-attribute">&lt;Leader&gt;</span>gd <span class="hljs-attribute">&lt;Plug&gt;</span>(coc-definition)
+nnoremap <span class="hljs-attribute">&lt;silent&gt;</span> <span class="hljs-attribute">&lt;Leader&gt;</span>gd :YcmCompleter GoTo<span class="hljs-attribute">&lt;CR&gt;</span>
+nnoremap <span class="hljs-attribute">&lt;silent&gt;</span> <span class="hljs-attribute">&lt;Leader&gt;</span>gf :YcmCompleter FixIt<span class="hljs-attribute">&lt;CR&gt;</span>
+inoremap (; (<span class="hljs-attribute">&lt;CR&gt;</span>);<span class="hljs-attribute">&lt;C-c&gt;</span>O
+inoremap (, (<span class="hljs-attribute">&lt;CR&gt;</span>),<span class="hljs-attribute">&lt;C-c&gt;</span>O
+inoremap {; {<span class="hljs-attribute">&lt;CR&gt;</span>};<span class="hljs-attribute">&lt;C-c&gt;</span>O
+inoremap {, {<span class="hljs-attribute">&lt;CR&gt;</span>},<span class="hljs-attribute">&lt;C-c&gt;</span>O
+inoremap [; [<span class="hljs-attribute">&lt;CR&gt;</span>];<span class="hljs-attribute">&lt;C-c&gt;</span>O
+inoremap [, [<span class="hljs-attribute">&lt;CR&gt;</span>],<span class="hljs-attribute">&lt;C-c&gt;</span>O
+</code></pre>
+        <p>To use this, paste the above content to your .vimrc file.
+            Then run the following commands in <code>NORMAL</code> mode - </p>
+        <pre><code><span class="hljs-selector-pseudo">:w</span>
+<span class="hljs-selector-pseudo">:source</span> %
+<span class="hljs-selector-pseudo">:PlugInstall</span>
+</code></pre>
+        <p>This is how your vim should look now - </p>
+        <p><img src="/blog/res/blog2.2.png" style="width: 80%; border-radius: 5px;" alt="alt text"></p>
+        <p>Download vim from <a href="https://www.vim.org/download.php">www.vim.org/download.php</a></p>
+
+    </div>
+    <hr>
+    <br>
+    <div class="icon-bar" style="font-size: 20px; position: fixed; bottom: 0; background-color: black">
+        <a href="https://github.com/smrpn" target="_blank" title="Github">
+            <p style="color: antiquewhite;">Github</p>
+        </a>
+        <a href="https://www.linkedin.com/in/samarpan-dutta-537013194/" target="_blank" title="Linkedin">
+            <p style="color: antiquewhite;">Linkedin</p>
+        </a>
+        <a href="https://www.instagram.com/_smrpn_/" target="_blank" title="Instagram">
+            <p style="color: antiquewhite;">Instagram</p>
+        </a>
+        <a href="https://www.facebook.com/samar.spams" target="_blank" title="Facebook">
+            <p style="color: antiquewhite;">Facebook</p>
+        </a>
+    </div>
+</body>
+
+</html>
