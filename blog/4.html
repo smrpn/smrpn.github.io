@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+    <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-193498318-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-193498318-1');
+    </script>
+    <title>smrpn/blog/1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="./../style.css">
+    <meta property="og:url" content="https://smrpn.github.io/blog/4.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="smrpn/blog/4" />
+    <meta property="og:description" content="How to use casbin authorization in your rust web-app [Part - 2]" />
+    <meta property="og:image" content="https://smrpn.github.io/blog/res/blog3.1.jpg" />
+</head>
+
+
+
+<body>
+
+    <div style="align-content: center;">
+        <h1 style="color:rgb(224, 233, 225);">
+            <a href="/blog.html" title="go back"
+                style="text-decoration: none;color:rgb(224, 233, 225);font-size: 40px;">&lt;-</a>
+            Blogs
+        </h1>
+    </div>
+    <br>
+    <hr>
+    <div style="color:rgb(224, 233, 225);">
+        <h1 id="my-.vimrc">How to use casbin authorization in your rust web-app [Part - 2]</h1>
+        <p>smrpn.
+            13th May, 2021.</p>
+        <hr><br><br>
+        <p>This is the second part of the blog about casbin.
+            Here we will discuss about the casbin model that we shall use in our project application.</p>
+        <p>Here is the <a
+                href="https://github.com/casbin-rs/examples/blob/master/actix-middleware-example/preset_policy.csv">link</a>
+            of a sample policy file.</p>
+        <pre><code class="lang-csv">p, user_role_post_publish, post_publish_group, (POST)|(GET)
+p, user_role_user, user_group, (<span class="hljs-keyword">DELETE</span>)|(POST)
+p, admin_role_user_manage, user_manage_group, (<span class="hljs-keyword">GET</span>)|(<span class="hljs-keyword">DELETE</span>)
+p, admin_role_post_manage, post_manage_group, (<span class="hljs-keyword">GET</span>)|(<span class="hljs-keyword">DELETE</span>)
+
+g2, /api/post, post_publish_group
+g2, /api/<span class="hljs-keyword">admin</span>/posts, post_manage_group
+g2, /api/<span class="hljs-keyword">user</span>/logout, user_group
+g2, /api/<span class="hljs-keyword">user</span>, user_group
+g2, /api/<span class="hljs-keyword">admin</span>/<span class="hljs-keyword">users</span>, user_manage_group
+g2, /api/<span class="hljs-keyword">admin</span>/post/:<span class="hljs-keyword">id</span>, post_manage_group
+g2, /api/<span class="hljs-keyword">admin</span>/<span class="hljs-keyword">user</span>/:<span class="hljs-keyword">id</span>, user_manage_group
+g3, /api/post/:<span class="hljs-keyword">id</span>, publicAction
+g3, /api/posts, publicAction
+g3, /api/auth/login, publicAction
+g3, /api/auth/signup, publicAction
+
+g, <span class="hljs-keyword">admin</span>, admin_role_user_manage
+g, <span class="hljs-keyword">admin</span>, admin_role_post_manage
+g, <span class="hljs-keyword">admin</span>, user_role_post_publish
+g, <span class="hljs-keyword">admin</span>, user_role_user
+</code></pre>
+        <p>Let&#39;s try to understand this -
+            <code>p</code> here represents policy. Policies generally have 3 parts -
+            <code>subject</code>, <code>object</code> and <code>action</code>. Here they can be understood as
+            <code>user role</code>, <code>path</code> and <code>request method</code>.
+            Furthermore, we can assign a <code>group</code> to our <code>object</code> or as used here,
+            <code>path</code>.
+            For example,
+            The first line of the file is
+        </p>
+        <pre><code>p, user_role_post_publish, post_publish_group, <span class="hljs-comment">(POST)</span>|<span class="hljs-comment">(GET)</span>
+</code></pre>
+        <p>This is a policy where all users that have the role <code>user_role_post_publish</code> can make a
+            <code>POST</code> and <code>GET</code> request on the subject <code>post_publish_group</code>, which is a
+            group. <code>post_publish_group</code> has the <code>/api/post</code> path, as mentioned in the file -
+        </p>
+        <pre><code>g2, <span class="hljs-regexp">/api/</span>post, post_publish_group
+</code></pre>
+        <p>Similarly, when we write </p>
+        <pre><code>p, user_role_user, user_group, <span class="hljs-comment">(DELETE)</span>|<span class="hljs-comment">(POST)</span>
+</code></pre>
+        <p>It simply means that users with <code>user_role_user</code> role can make <code>DELETE</code> and
+            <code>POST</code> requests on url paths in the <code>user_group</code> group. These url paths are
+            <code>/api/user/logout</code> and <code>/api/user</code>.
+        </p>
+        <p><code>publicAction</code> is a group which has paths which are accessible to every user regardless of role.
+        </p>
+        <p>A group can have multiple url paths, an url path cannot belong to more than one group.</p>
+        <p>Next, the <code>.conf</code> file - </p>
+        <pre><code><span class="hljs-section">[request_definition]</span>
+<span class="hljs-attr">r</span> = sub, obj, act
+<span class="hljs-section">
+[policy_definition]</span>
+<span class="hljs-attr">p</span> = sub, obj, act
+<span class="hljs-section">
+[role_definition]</span>
+<span class="hljs-attr">g</span> = _, _
+<span class="hljs-attr">g2</span> = _, _
+<span class="hljs-attr">g3</span> = _, _
+<span class="hljs-attr">g4</span> = _, _
+<span class="hljs-section">
+[policy_effect]</span>
+<span class="hljs-attr">e</span> = some(where (p.eft == allow))
+<span class="hljs-section">
+[matchers]</span>
+<span class="hljs-attr">m</span> = g(r.sub, p.sub) &amp;&amp; g2(r.obj, p.obj) &amp;&amp; regexMatch(r.act, p.act) || g3(r.obj, <span class="hljs-string">"publicAction"</span>) || r.sub == <span class="hljs-string">"root"</span>
+</code></pre>
+        <p>As mentioned in the first blog, <code>request_definition</code> is the syntax of our request. First we have
+            the subject, <code>sub</code>, then we have the object, <code>obj</code>, and then the action,
+            <code>act</code>.
+            In our example, <code>sub</code> is the role, <code>obj</code> is the url path/group of url paths, and
+            <code>act</code> is a HTTP method.
+            <code>policy_definition</code> should match with the <code>request_definition</code> for things to not
+            break.(think of this as a schema)
+            Now we have <code>role_definition</code>, from where casbin reads what each role has access to(for example,
+            let&#39;s say some <code>employee</code> role has access to <code>/api/tasks/:userId/today</code>).
+        </p>
+        <p>In <code>policy_effect</code> here, <code>e = some(where (p.eft == allow))</code> translates to - if the
+            matching strategy result p.eft has the result of (some) allow, then the final result is true.</p>
+        <p>In <code>matchers</code>, we are checking if the request and policy components are equal. We are using
+            <code>regexMatch</code> to check actions because here they are HTTP methods.
+            For example the final result is true when the request subject, <code>r.sub</code> is equal to
+            <code>root</code>, in which case it has all the permissions. This entire expression
+            <code>m = g(r.sub, p.sub) &amp;&amp; g2(r.obj, p.obj) &amp;&amp; regexMatch(r.act, p.act) || g3(r.obj, &quot;publicAction&quot;) || r.sub == &quot;root&quot;</code>
+            means, that if the requested parameters match with those in the policy, i.e., <code>sub</code>,
+            <code>obj</code> and <code>act</code>, return the policy result ,<code>p.eft</code>, which is again
+            rechecked in <code>policy_effect</code>.
+        </p>
+        <p>That is all for this blog. Hope the concepts are explained well enough.
+            In the next blog, i.e., we will use this model in our actix-web app.
+        </p>
+
+
+    </div>
+    <hr>
+    <br>
+    <div class="icon-bar" style="font-size: 20px; position: fixed; bottom: 0; background-color: black">
+        <a href="https://github.com/smrpn" target="_blank" title="Github">
+            <p style="color: antiquewhite;">Github</p>
+        </a>
+        <a href="https://www.linkedin.com/in/samarpan-dutta-537013194/" target="_blank" title="Linkedin">
+            <p style="color: antiquewhite;">Linkedin</p>
+        </a>
+        <a href="https://www.instagram.com/_smrpn_/" target="_blank" title="Instagram">
+            <p style="color: antiquewhite;">Instagram</p>
+        </a>
+        <a href="https://www.facebook.com/samar.spams" target="_blank" title="Facebook">
+            <p style="color: antiquewhite;">Facebook</p>
+        </a>
+    </div>
+</body>
+
+</html>
