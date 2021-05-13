@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+    <link rel="shortcut icon" href="../res/favicon.ico" type="image/x-icon">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-193498318-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-193498318-1');
+    </script>
+    <title>smrpn/blog/1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="./../style.css">
+    <meta property="og:url" content="https://smrpn.github.io/blog/3.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="smrpn/blog/3" />
+    <meta property="og:description" content="How to use casbin authorization in your rust web-app [Part - 1]" />
+    <meta property="og:image" content="https://smrpn.github.io/blog/res/blog3.1.png" />
+</head>
+
+
+
+<body>
+
+    <div style="align-content: center;">
+        <h1 style="color:rgb(224, 233, 225);">
+            <a href="/blog.html" title="go back"
+                style="text-decoration: none;color:rgb(224, 233, 225);font-size: 40px;">&lt;-</a>
+            Blogs
+        </h1>
+    </div>
+    <br>
+    <hr>
+    <div style="color:rgb(224, 233, 225);">
+        <h1 id="my-.vimrc">How to use casbin authorization in your rust web-app [Part - 1]</h1>
+        <p>smrpn.
+            13th May, 2021.</p>
+        <hr><br><br>
+        <p>Casbin is a mature and easy-to-use permission control library in rust.</p>
+        <h4 id="what-is-casbin-">What is Casbin?</h4>
+        <p><a href="https://github.com/casbin/casbin">Casbin</a> is a permission control library based on Go language
+            developed by <a href="https://github.com/hsluoyz">Dr. Luo Yang</a>. It supports common access control models
+            such as ACL, RBAC, ABAC, etc.
+            <a href="https://github.com/casbin/casbin-rs">Casbin-rs</a> is a Rust port of the project, which has higher
+            speed and memory security than the Go language version.
+        </p>
+        <h5 id="what-casbin-does-">What Casbin does -</h5>
+        <ul>
+            <li>Casbin&#39;s configuration file consists of two parts, one is the Configuration file (can be understood
+                as the model configuration file), which configures the model (Model) selection, group (Group)
+                configuration, defines the request (Request) and policy (Policy) structure, and then has It is the
+                configuration of the matcher (Matcher), which will be described later. The other is the container for
+                the policy (Policy), which can be a csv file or a database (MySQL/PostgreSQl). Policies in the container
+                are derived from the configuration of the Model.(can be understood as the model configuration file),
+                which configures the model (Model) selection, group (Group) configuration, defines the request (Request)
+                and policy (Policy) structure and the configuration of the matcher (Matcher), which will be described
+                later. The other is the container for the policy (Policy), which can be a csv file or a database
+                (MySQL/PostgreSQl). Policies in the container are derived from the configuration of the Model.</li>
+            <li>Support multi-layer role inheritance in RBAC, not only subjects can have roles, resources can also have
+                roles.</li>
+            <li>Support super users, such as root or Administrator, super users can access any resources without being
+                restricted by authorization policies. </li>
+            <li>Support a variety of built-in operators, such as keyMatch, to facilitate the management of path-based
+                resources, such as /book/1 can be mapped to /book/:id</li>
+        </ul>
+        <h5 id="what-casbin-does-not-do-">What Casbin does not do -</h5>
+        <ul>
+            <li>For identity authentication (that is, to verify the user&#39;s user name and password), casbin is only
+                responsible for access control. There should be other specialized components responsible for identity
+                authentication, and then access control by casbin. The two are in a cooperative relationship.</li>
+            <li>Manage user lists or role lists. Casbin believes that it is more appropriate to manage the user and role
+                list by the project itself. Users usually have their passwords, but Casbin&#39;s design idea is not to
+                use it as a container for storing passwords. Instead, it stores the mapping relationship between users
+                and roles in the RBAC scheme.</li>
+        </ul>
+        <h5 id="a-model-configuration-">A model configuration -</h5>
+        <pre><code>// model.conf
+<span class="hljs-comment"># Request definition</span>
+[request_definition]
+<span class="hljs-attr">r</span> = sub, obj, act
+
+<span class="hljs-comment"># Policy definition</span>
+[policy_definition]
+<span class="hljs-attr">p</span> = sub, obj, act
+
+<span class="hljs-comment"># Policy effect</span>
+[policy_effect]
+<span class="hljs-attr">e</span> = some(where (p.<span class="hljs-attr">eft</span> == allow))
+
+<span class="hljs-comment"># Matchers</span>
+[matchers]
+<span class="hljs-attr">m</span> = r.<span class="hljs-attr">sub</span> == p.sub &amp;&amp; r.<span class="hljs-attr">obj</span> == p.obj &amp;&amp; r.<span class="hljs-attr">act</span> == p.act
+</code></pre>
+        <p>This is a model definition file, where <code>sub</code> represents the user, <code>obj</code> is the resource
+            to be accessed, and <code>act</code> the operation performed on the resource.
+            When using casbin in a web app, <code>sub</code> corresponds to the username, <code>obj</code> corresponds
+            to the URL Path accessed, and <code>act</code> represents a HTTP method (GET/POST/PUT/DELETE etc).</p>
+        <p>Here, <code>request_definition</code> tells us what constitutes a request. <code>policy_definition</code> is
+            the same as in request. <code>policy_effect</code> tells us when the rule is valid.
+            The job of the Matcher is to return a boolean value when the request and the policy satisfy a certain
+            relation.</p>
+        <p>If we want to add a super administrator, it can perform any operation, we can write:</p>
+        <pre><code>[matchers]
+<span class="hljs-attr">m</span> = r.<span class="hljs-attr">sub</span> == p.sub &amp;&amp; r.<span class="hljs-attr">obj</span> == p.obj &amp;&amp; r.<span class="hljs-attr">act</span> == p.act || r.<span class="hljs-attr">sub</span> == <span class="hljs-string">"root"</span>
+</code></pre>
+        <p>It is clearly visible here that <code>m</code> is true when the request subject is <code>root</code> , i.e.,
+            it has all the possible permissions.</p>
+        <h5 id="policy-configuration">Policy configuration</h5>
+        <pre><code><span class="hljs-selector-tag">p</span>, alice, data1, read
+<span class="hljs-selector-tag">p</span>, bob, data2, write
+</code></pre>
+        <p>This literally translates to - <code>alice</code> can <code>read</code> from <code>data1</code>, and
+            <code>bob</code> can <code>write</code> to <code>data2</code>.
+        </p>
+        <h4 id="the-casbin-rust-ecosystem">The Casbin Rust ecosystem</h4>
+        <p>Casbin-RS : Currently supports all features supported by Casbin Go version and is under active development
+        </p>
+        <p>At present, Casbin Rust is developing steadily. The currently supported components are:</p>
+        <p><a href="https://github.com/casbin-rs/diesel-adapter">Casbin Diesel Adaper</a> : Adapter developed using the
+            diesel ORM library, suppors MySQL/PostgreSQL/SQLite
+            <a href="https://github.com/casbin-rs/actix-casbin-auth">Casbin Actix-web Middleware</a> : Actix-web is the
+            fastest web-framework. Casbin supports Actix middleware and automatically manages permissions for requests
+            <a href="https://github.com/casbin-rs/actix-casbin">Casbin Actix-web Actor</a> : Casbin is re-encapsulated
+            under the Actix framework, which is convenient for use in Actix-web and encapsulates common functions
+            <a href="https://github.com/casbin-rs/sqlx-adapter">Casbin Sqlx Adapter</a> : Supports fully asynchronous
+            database middleware with better performance, based on Sqlx. Support MySQL/PostgreSQL
+        </p>
+        <p><a href="https://casbin.org/">Casbin official website</a>
+            <a href="https://forum.casbin.org/">Casbin Forum</a>
+            Casbin also supports other languages ​​besides Go and Rust: Javascript, PHP, Python, C#(.NET), C++, Java etc
+        </p>
+        <p>In next blog, i.e., Part 2, we will talk about implementing casbin authorization in an actix web-app, using
+            the actix middleware.</p>
+
+    </div>
+    <hr>
+    <br>
+    <div class="icon-bar" style="font-size: 20px; position: fixed; bottom: 0; background-color: black">
+        <a href="https://github.com/smrpn" target="_blank" title="Github">
+            <p style="color: antiquewhite;">Github</p>
+        </a>
+        <a href="https://www.linkedin.com/in/samarpan-dutta-537013194/" target="_blank" title="Linkedin">
+            <p style="color: antiquewhite;">Linkedin</p>
+        </a>
+        <a href="https://www.instagram.com/_smrpn_/" target="_blank" title="Instagram">
+            <p style="color: antiquewhite;">Instagram</p>
+        </a>
+        <a href="https://www.facebook.com/samar.spams" target="_blank" title="Facebook">
+            <p style="color: antiquewhite;">Facebook</p>
+        </a>
+    </div>
+</body>
+
+</html>
